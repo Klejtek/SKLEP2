@@ -44,7 +44,7 @@ function authenticateToken(req, res, next) {
     });
 }
 
-// Dodajemy endpoint do weryfikacji tokena
+// Endpoint do weryfikacji tokena
 app.post('/verify-token', (req, res) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
@@ -110,6 +110,24 @@ app.post('/login', async (req, res) => {
     } catch (error) {
         console.error('Błąd podczas logowania:', error);
         res.status(500).json({ error: 'Wystąpił błąd podczas logowania' });
+    }
+});
+
+// Endpoint: Pobieranie zawartości koszyka użytkownika
+app.get('/api/cart', authenticateToken, async (req, res) => {
+    const username = req.user.username;  // Zakładamy, że token zawiera nazwę użytkownika
+
+    try {
+        const cart = await db.collection('carts').findOne({ username });
+
+        if (!cart) {
+            return res.status(404).json({ message: 'Koszyk nie został znaleziony.' });
+        }
+
+        res.status(200).json(cart.items);  // Zakładam, że `items` to tablica produktów w koszyku
+    } catch (error) {
+        console.error('Błąd podczas pobierania koszyka:', error);
+        res.status(500).json({ message: 'Błąd podczas pobierania koszyka' });
     }
 });
 
