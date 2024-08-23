@@ -115,7 +115,7 @@ app.post('/login', async (req, res) => {
 
 // Endpoint: Pobieranie zawartości koszyka użytkownika
 app.get('/api/cart', authenticateToken, async (req, res) => {
-    const username = req.user.username;  // Zakładamy, że token zawiera nazwę użytkownika
+    const username = req.user.username;
 
     try {
         const cart = await db.collection('carts').findOne({ username });
@@ -124,7 +124,7 @@ app.get('/api/cart', authenticateToken, async (req, res) => {
             return res.status(404).json({ message: 'Koszyk nie został znaleziony.' });
         }
 
-        res.status(200).json(cart.items);  // Zakładam, że `items` to tablica produktów w koszyku
+        res.status(200).json(cart.items);
     } catch (error) {
         console.error('Błąd podczas pobierania koszyka:', error);
         res.status(500).json({ message: 'Błąd podczas pobierania koszyka' });
@@ -171,6 +171,41 @@ app.post('/orders', authenticateToken, async (req, res) => {
     } catch (error) {
         console.error('Błąd podczas dodawania zamówienia:', error);
         res.status(500).json({ error: 'Wystąpił błąd podczas dodawania zamówienia' });
+    }
+});
+
+// Endpoint: Pobieranie listy produktów
+app.get('/api/products', async (req, res) => {
+    try {
+        const products = await db.collection('products').find({}).toArray();
+        res.status(200).json(products);
+    } catch (error) {
+        console.error('Błąd podczas pobierania produktów:', error);
+        res.status(500).json({ message: 'Błąd podczas pobierania produktów' });
+    }
+});
+
+// Endpoint: Dodawanie nowego produktu
+app.post('/api/products', async (req, res) => {
+    const { name, description, imageUrl } = req.body;
+
+    try {
+        // Upewnij się, że wszystkie wymagane pola są dostępne
+        if (!name || !description || !imageUrl) {
+            return res.status(400).json({ message: 'Brak wymaganych danych: name, description, imageUrl' });
+        }
+
+        const newProduct = {
+            name,
+            description,
+            imageUrl
+        };
+
+        const result = await db.collection('products').insertOne(newProduct);
+        res.status(201).json({ message: 'Produkt został dodany', insertedId: result.insertedId });
+    } catch (error) {
+        console.error('Błąd podczas dodawania produktu:', error);
+        res.status(500).json({ message: 'Wystąpił błąd podczas dodawania produktu' });
     }
 });
 
