@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sklep z Aromatami</title>
+    <link rel="stylesheet" href="style.css">
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('token');
+            console.log('Token w localStorage:', token); // Dodano log do diagnostyki
+
+            if (token) {
+                console.log('Wysyłam zapytanie weryfikujące token...');
+                // Weryfikacja tokena na serwerze
+                fetch('https://sklep2.onrender.com/verify-token', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                }).then(response => {
+                    console.log('Odpowiedź z serwera:', response); // Dodano log odpowiedzi z serwera
+                    if (response.ok) {
+                        console.log('Token jest poprawny.');
+                        const username = localStorage.getItem('username');
+                        if (username) {
+                            document.getElementById('user-greeting').textContent = 'Witaj, ' + username + '!';
+                        }
+                    } else {
+                        console.log('Token jest nieprawidłowy lub wygasł.');
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('username');
+                        window.location.href = 'login.html';
+                    }
+                }).catch(error => {
+                    console.error('Błąd weryfikacji tokena:', error);
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('username');
+                    window.location.href = 'login.html';
+                });
+            } else {
+                console.log('Brak tokena, przekierowanie na stronę logowania.');
+                window.location.href = 'login.html';
+            }
+
+            // Wylogowanie użytkownika
+            document.getElementById('logout-button').addEventListener('click', function() {
+                console.log('Wylogowywanie użytkownika...');
+                localStorage.removeItem('token');
+                localStorage.removeItem('username');
+                window.location.href = 'login.html';
+            });
+        });
+    </script>
+</head>
+<body>
+    <header>
+        <div class="logo">Sklep z Aromatami</div>
+        <nav>
+            <ul>
+                <li><a href="#home">Strona Główna</a></li>
+                <li><a href="#shop">Sklep</a></li>
+                <li><a href="#about">O Nas</a></li>
+                <li><a href="#contact">Kontakt</a></li>
+                <li><a href="cart.html">Koszyk (<span id="cart-count">0</span>)</a></li>
+            </ul>
+        </nav>
+        <div id="user-greeting"></div>
+        <button id="logout-button">Wyloguj</button>
+    </header>
+
+    <main>
+        <section id="home">
+            <h1>Witaj w naszym sklepie!</h1>
+            <p>Oferujemy szeroki wybór aromatów. Sprawdź nasze produkty!</p>
+            <a href="#shop" class="button">Zobacz Produkty</a>
+        </section>
+
+        <section id="shop">
+            <h2>Nasze Produkty</h2>
+            <div class="product-grid">
+                <!-- Produkty będą wstawione tutaj -->
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Sklep z Aromatami. Wszystkie prawa zastrzeżone.</p>
+    </footer>
+    <script src="script.js"></script>
+</body>
+</html>
