@@ -44,6 +44,24 @@ function authenticateToken(req, res, next) {
     });
 }
 
+// Dodajemy endpoint do weryfikacji tokena
+app.post('/verify-token', (req, res) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) {
+        return res.status(401).json({ message: 'Brak tokena' });
+    }
+
+    jwt.verify(token, secret, (err, user) => {
+        if (err) {
+            return res.status(401).json({ message: 'Token jest nieprawidłowy lub wygasł' });
+        }
+
+        res.status(200).json({ message: 'Token jest prawidłowy', user });
+    });
+});
+
 // Obsługa statycznych plików
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -137,8 +155,6 @@ app.post('/orders', authenticateToken, async (req, res) => {
         res.status(500).json({ error: 'Wystąpił błąd podczas dodawania zamówienia' });
     }
 });
-
-// Więcej endpointów dla realized-orders, paid-orders, itd., można również zoptymalizować podobnie.
 
 // Uruchomienie serwera na porcie 3000
 app.listen(process.env.PORT || 3000, () => {
