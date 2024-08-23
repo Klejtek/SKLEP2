@@ -10,25 +10,39 @@ document.getElementById('login-form').addEventListener('submit', async function(
 
     if (username && password) {
         try {
-            const response = await fetch('https://sklep2.onrender.com/login', {
+            const response = await fetch('https://sklep2.onrender.com/login', {  // Upewnij się, że domena jest poprawna
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ username, password })
+                body: JSON.stringify({ username, password }) // Zamień dane na JSON
             });
 
             console.log('Odpowiedź serwera:', response); // Logowanie odpowiedzi serwera
 
-            const result = await response.json();
+            if (!response.ok) {
+                const errorMessage = await response.text();
+                console.error('Błąd odpowiedzi serwera:', errorMessage); // Log błędu, jeśli odpowiedź nie jest poprawna
+                alert('Błąd: ' + errorMessage);
+                return;
+            }
+
+            const result = await response.json(); // Parsowanie odpowiedzi jako JSON
             console.log('Treść odpowiedzi serwera:', result); // Logowanie odpowiedzi w JSON
 
-            if (response.ok && result.token) {
+            if (result.token) {
                 console.log('Token otrzymany:', result.token); // Logowanie tokena
-                localStorage.setItem('token', result.token);
-                localStorage.setItem('username', username);
-                alert('Zalogowano pomyślnie!');
-                window.location.href = username === 'MKL' ? 'admin.html' : 'index.html';
+                localStorage.setItem('token', result.token); // Zapisanie tokena
+                localStorage.setItem('username', username); // Zapisanie nazwy użytkownika
+                
+                // Sprawdź, czy użytkownik to administrator
+                if (username === 'MKL') {
+                    alert('Zalogowano jako administrator!');
+                    window.location.href = 'admin.html'; // Przekierowanie administratora
+                } else {
+                    alert('Zalogowano pomyślnie!');
+                    window.location.href = 'index.html'; // Przekierowanie użytkownika sklepu
+                }
             } else {
                 alert(result.message || 'Nieprawidłowy login lub hasło!');
             }
