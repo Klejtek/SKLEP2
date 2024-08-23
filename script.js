@@ -219,5 +219,41 @@ document.addEventListener('DOMContentLoaded', function() {
         checkCartVisibility();
     });
 
+    async function fetchProducts() {
+        try {
+            const response = await fetch('https://sklep2.onrender.com/api/products');
+            if (!response.ok) {
+                throw new Error(`Błąd HTTP: ${response.status}`);
+            }
+
+            const products = await response.json();
+            displayProducts(products);
+        } catch (error) {
+            console.error('Błąd podczas pobierania produktów:', error);
+            alert('Nie udało się pobrać produktów.');
+        }
+    }
+
+    function displayProducts(products) {
+        const productGrid = document.querySelector('.product-grid');
+        productGrid.innerHTML = '';  // Wyczyść istniejącą zawartość
+
+        products.forEach(product => {
+            const productElement = document.createElement('div');
+            productElement.classList.add('product');
+
+            productElement.innerHTML = `
+                <img src="${product.imageUrl}" alt="${product.name}">
+                <h3>${product.name}</h3>
+                <p>${product.description}</p>
+                <button onclick="addToCart('${product.name}')">Dodaj do koszyka</button>
+            `;
+
+            productGrid.appendChild(productElement);
+        });
+    }
+
+    fetchProducts();  // Wywołaj funkcję do pobierania produktów na początku
+
     displayCart();
 });
