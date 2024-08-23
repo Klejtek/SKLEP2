@@ -131,6 +131,39 @@ app.get('/api/cart', authenticateToken, async (req, res) => {
     }
 });
 
+// Endpoint: Dodawanie produktu do koszyka
+app.post('/api/cart', authenticateToken, async (req, res) => {
+    const username = req.user.username;
+    const { productName } = req.body;
+
+    try {
+        let cart = await db.collection('carts').findOne({ username });
+
+        if (!cart) {
+            cart = { username, items: [] };
+        }
+
+        const existingProduct = cart.items.find(item => item.productName === productName);
+
+        if (existingProduct) {
+            existingProduct.quantity += 1;
+        } else {
+            cart.items.push({ productName, quantity: 1 });
+        }
+
+        await db.collection('carts').updateOne(
+            { username },
+            { $set: { items: cart.items } },
+            { upsert: true }
+        );
+
+        res.status(200).json({ message: 'Produkt dodany do koszyka', cart: cart.items });
+    } catch (error) {
+        console.error('Błąd podczas dodawania produktu do koszyka:', error);
+        res.status(500).json({ message: 'Wystąpił problem z dodawaniem produktu do koszyka' });
+    }
+});
+
 // Endpoint: Pobieranie wszystkich zamówień
 app.get('/orders', authenticateToken, async (req, res) => {
     try {
@@ -190,16 +223,11 @@ app.post('/api/products', async (req, res) => {
     const { name, description, imageUrl } = req.body;
 
     try {
-        // Upewnij się, że wszystkie wymagane pola są dostępne
         if (!name || !description || !imageUrl) {
             return res.status(400).json({ message: 'Brak wymaganych danych: name, description, imageUrl' });
         }
 
-        const newProduct = {
-            name,
-            description,
-            imageUrl
-        };
+        const newProduct = { name, description, imageUrl };
 
         const result = await db.collection('products').insertOne(newProduct);
         res.status(201).json({ message: 'Produkt został dodany', insertedId: result.insertedId });

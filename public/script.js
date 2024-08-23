@@ -38,36 +38,38 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     async function addToCart(productName) {
-        const token = localStorage.getItem('token');
+    const token = localStorage.getItem('token');
 
-        if (!token) {
-            alert('Brak tokena. Proszę zalogować się ponownie.');
-            window.location.href = 'login.html';
-            return;
-        }
-
-        try {
-            const response = await fetch('https://sklep2.onrender.com/api/cart', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ productName })
-            });
-
-            const result = await response.json();
-            if (response.ok) {
-                updateCartCount(result.cart);
-                showNotification('Dodano do koszyka');
-            } else {
-                alert(result.message || 'Wystąpił problem z dodaniem produktu do koszyka.');
-            }
-        } catch (error) {
-            console.error('Błąd podczas dodawania produktu do koszyka:', error);
-            alert('Wystąpił błąd podczas dodawania produktu do koszyka.');
-        }
+    if (!token) {
+        alert('Brak tokena. Proszę zalogować się ponownie.');
+        window.location.href = 'login.html';
+        return;
     }
+
+    try {
+        const response = await fetch('https://sklep2.onrender.com/api/cart', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ productName })
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            updateCartCount(result.cart);
+            showNotification('Dodano do koszyka');
+        } else {
+            console.error('Błąd serwera:', result.message);
+            alert(result.message || 'Wystąpił problem z dodaniem produktu do koszyka.');
+        }
+    } catch (error) {
+        console.error('Błąd podczas dodawania produktu do koszyka:', error);
+        alert('Wystąpił błąd podczas dodawania produktu do koszyka.');
+    }
+}
+
 
     async function removeFromCart(index) {
         const token = localStorage.getItem('token');
