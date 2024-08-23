@@ -8,7 +8,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', async function() {
             const token = localStorage.getItem('token');
-            const response = await fetch('https://kuciapki.onrender.com/api/orders', {
+            const response = await fetch('https://sklep2.onrender.com/api/orders', {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -59,7 +59,7 @@
 
         async function markOrderAsRealized(orderId) {
             const token = localStorage.getItem('token');
-            const response = await fetch(`https://kuciapki.onrender.com/api/orders/${orderId}/realize`, {
+            const response = await fetch(`https://sklep2.onrender.com/api/orders/${orderId}/realize`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,

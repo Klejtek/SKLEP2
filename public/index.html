@@ -7,10 +7,49 @@
     <link rel="stylesheet" href="style.css">
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const username = localStorage.getItem('username');
-            if (!username) {
+            const token = localStorage.getItem('token');
+            console.log('Token w localStorage:', token); // Dodano log do diagnostyki
+
+            if (token) {
+                console.log('Wysyłam zapytanie weryfikujące token...');
+                // Weryfikacja tokena na serwerze
+                fetch('https://sklep2.onrender.com/verify-token', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                }).then(response => {
+                    console.log('Odpowiedź z serwera:', response); // Dodano log odpowiedzi z serwera
+                    if (response.ok) {
+                        console.log('Token jest poprawny.');
+                        const username = localStorage.getItem('username');
+                        if (username) {
+                            document.getElementById('user-greeting').textContent = 'Witaj, ' + username + '!';
+                        }
+                    } else {
+                        console.log('Token jest nieprawidłowy lub wygasł.');
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('username');
+                        window.location.href = 'login.html';
+                    }
+                }).catch(error => {
+                    console.error('Błąd weryfikacji tokena:', error);
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('username');
+                    window.location.href = 'login.html';
+                });
+            } else {
+                console.log('Brak tokena, przekierowanie na stronę logowania.');
                 window.location.href = 'login.html';
             }
+
+            // Wylogowanie użytkownika
+            document.getElementById('logout-button').addEventListener('click', function() {
+                console.log('Wylogowywanie użytkownika...');
+                localStorage.removeItem('token');
+                localStorage.removeItem('username');
+                window.location.href = 'login.html';
+            });
         });
     </script>
 </head>

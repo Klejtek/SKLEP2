@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     async function getCart() {
         const token = localStorage.getItem('token');
-        const response = await fetch('https://kuciapki.onrender.com/api/cart', {
+        const response = await fetch('https://sklep2.onrender.com/api/cart', {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     async function addToCart(productName) {
         const token = localStorage.getItem('token');
-        const response = await fetch('https://kuciapki.onrender.com/api/cart', {
+        const response = await fetch('https://sklep2.onrender.com/api/cart', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     async function removeFromCart(index) {
         const token = localStorage.getItem('token');
-        const response = await fetch(`https://kuciapki.onrender.com/api/cart/${index}`, {
+        const response = await fetch(`https://sklep2.onrender.com/api/cart/${index}`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     async function clearCart() {
         const token = localStorage.getItem('token');
-        await fetch('https://kuciapki.onrender.com/api/cart', {
+        await fetch('https://sklep2.onrender.com/api/cart', {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${token}`
