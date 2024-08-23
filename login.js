@@ -34,8 +34,15 @@ document.getElementById('login-form').addEventListener('submit', async function(
                 console.log('Token otrzymany:', result.token); // Logowanie tokena
                 localStorage.setItem('token', result.token); // Zapisanie tokena
                 localStorage.setItem('username', username); // Zapisanie nazwy użytkownika
-                alert('Zalogowano pomyślnie!');
-                window.location.href = username === 'MKL' ? 'admin.html' : 'index.html'; // Przekierowanie
+                
+                // Sprawdź, czy użytkownik to administrator
+                if (username === 'MKL') {
+                    alert('Zalogowano jako administrator!');
+                    window.location.href = 'admin.html'; // Przekierowanie administratora
+                } else {
+                    alert('Zalogowano pomyślnie!');
+                    window.location.href = 'index.html'; // Przekierowanie użytkownika sklepu
+                }
             } else {
                 alert(result.message || 'Nieprawidłowy login lub hasło!');
             }
