@@ -35,7 +35,7 @@ function authenticateToken(req, res, next) {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
 
-    if (token == null) return res.status(401).json({ message: 'Brak tokena, autoryzacja nieudana' });
+    if (!token) return res.status(401).json({ message: 'Brak tokena, autoryzacja nieudana' });
 
     jwt.verify(token, secret, (err, user) => {
         if (err) return res.status(403).json({ message: 'Token nieprawidłowy' });
@@ -164,6 +164,36 @@ app.post('/api/cart', authenticateToken, async (req, res) => {
     }
 });
 
+// Endpoint: Usuwanie produktu z koszyka
+app.delete('/api/cart/:index', authenticateToken, async (req, res) => {
+    const username = req.user.username;
+    const index = parseInt(req.params.index);
+
+    try {
+        let cart = await db.collection('carts').findOne({ username });
+
+        if (!cart) {
+            return res.status(404).json({ message: 'Koszyk nie został znaleziony.' });
+        }
+
+        if (index >= 0 && index < cart.items.length) {
+            cart.items.splice(index, 1);
+
+            await db.collection('carts').updateOne(
+                { username },
+                { $set: { items: cart.items } }
+            );
+
+            res.status(200).json({ message: 'Produkt usunięty z koszyka', cart: cart.items });
+        } else {
+            res.status(400).json({ message: 'Nieprawidłowy indeks produktu' });
+        }
+    } catch (error) {
+        console.error('Błąd podczas usuwania produktu z koszyka:', error);
+        res.status(500).json({ message: 'Wystąpił błąd podczas usuwania produktu z koszyka' });
+    }
+});
+
 // Endpoint: Pobieranie wszystkich zamówień
 app.get('/orders', authenticateToken, async (req, res) => {
     try {
@@ -235,6 +265,11 @@ app.post('/api/products', async (req, res) => {
         console.error('Błąd podczas dodawania produktu:', error);
         res.status(500).json({ message: 'Wystąpił błąd podczas dodawania produktu' });
     }
+});
+
+// Obsługa błędów 404 dla nieistniejących tras
+app.use((req, res, next) => {
+    res.status(404).send('Endpoint nie został znaleziony');
 });
 
 // Uruchomienie serwera na porcie 3000

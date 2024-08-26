@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!token) {
             alert('Brak tokena. Proszę zalogować się ponownie.');
             window.location.href = 'login.html';
-            return;
+            return [];
         }
 
         try {
@@ -61,6 +61,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 updateCartCount(result.cart);
                 showNotification('Dodano do koszyka');
             } else {
+                console.error('Błąd serwera:', result.message);
                 alert(result.message || 'Wystąpił problem z dodaniem produktu do koszyka.');
             }
         } catch (error) {
@@ -87,10 +88,13 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             if (response.ok) {
+                const updatedCart = await response.json();
+                updateCartCount(updatedCart);
                 displayCart();
-                updateCartCount([]);
+                showNotification('Produkt usunięty z koszyka');
             } else {
-                alert('Nie udało się usunąć produktu z koszyka.');
+                const errorMessage = await response.text();
+                alert('Nie udało się usunąć produktu z koszyka: ' + errorMessage);
             }
         } catch (error) {
             console.error('Błąd podczas usuwania produktu z koszyka:', error);
@@ -236,6 +240,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function displayProducts(products) {
         const productGrid = document.querySelector('.product-grid');
+
+        if (!productGrid) {
+            console.error('Nie można znaleźć elementu .product-grid w DOM');
+            return;
+        }
+
         productGrid.innerHTML = '';  // Wyczyść istniejącą zawartość
 
         products.forEach(product => {
