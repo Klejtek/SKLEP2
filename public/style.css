@@ -78,3 +78,8 @@ footer {
     width: 100%;
     bottom: 0;
 }
+
+/* Styl dla ukrytego przycisku */
+.hidden {
+    display: none;
+}
