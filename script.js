@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (response.ok) {
                 const updatedCart = await response.json();
-                updateCartCount(updatedCart);
+                updateCartCount(updatedCart.cart);
                 displayCart();
                 showNotification('Produkt usunięty z koszyka');
             } else {
@@ -231,6 +231,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             const products = await response.json();
+            console.log('Pobrane produkty:', products);  // Logowanie pobranych produktów
             displayProducts(products);
         } catch (error) {
             console.error('Błąd podczas pobierania produktów:', error);
@@ -245,6 +246,8 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Nie można znaleźć elementu .product-grid w DOM');
             return;
         }
+
+        console.log('Element .product-grid istnieje w DOM');
 
         productGrid.innerHTML = '';  // Wyczyść istniejącą zawartość
 
