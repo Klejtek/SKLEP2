@@ -194,6 +194,31 @@ app.delete('/api/cart/:index', authenticateToken, async (req, res) => {
     }
 });
 
+// Endpoint: Opróżnianie koszyka
+app.delete('/api/cart/clear', authenticateToken, async (req, res) => {
+    const username = req.user.username;
+
+    try {
+        const cart = await db.collection('carts').findOne({ username });
+
+        if (!cart) {
+            return res.status(404).json({ message: 'Koszyk nie został znaleziony.' });
+        }
+
+        cart.items = [];  // Opróżnij koszyk
+
+        await db.collection('carts').updateOne(
+            { username },
+            { $set: { items: cart.items } }
+        );
+
+        res.status(200).json({ message: 'Koszyk został opróżniony', cart: [] });
+    } catch (error) {
+        console.error('Błąd podczas opróżniania koszyka:', error);
+        res.status(500).json({ message: 'Wystąpił problem z opróżnianiem koszyka' });
+    }
+});
+
 // Endpoint: Pobieranie wszystkich zamówień
 app.get('/orders', authenticateToken, async (req, res) => {
     try {

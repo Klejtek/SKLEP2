@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (response.ok) {
                 const updatedCart = await response.json();
-                updateCartCount(updatedCart.cart);
+                updateCartCount(updatedCart);
                 displayCart();
                 showNotification('Produkt usunięty z koszyka');
             } else {
@@ -99,6 +99,38 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (error) {
             console.error('Błąd podczas usuwania produktu z koszyka:', error);
             alert('Wystąpił błąd podczas usuwania produktu z koszyka.');
+        }
+    }
+
+    async function clearCart() {
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+            alert('Brak tokena. Proszę zalogować się ponownie.');
+            window.location.href = 'login.html';
+            return;
+        }
+
+        try {
+            const response = await fetch('https://sklep2.onrender.com/api/cart/clear', {  // Używamy ścieżki 'clear'
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                displayCart();
+                updateCartCount([]);
+                showNotification('Koszyk został opróżniony.');
+            } else {
+                const errorMessage = await response.text();
+                console.error('Błąd podczas opróżniania koszyka:', errorMessage);
+                alert('Nie udało się opróżnić koszyka: ' + errorMessage);
+            }
+        } catch (error) {
+            console.error('Błąd podczas opróżniania koszyka:', error);
+            alert('Wystąpił błąd podczas opróżniania koszyka.');
         }
     }
 
@@ -160,30 +192,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    async function clearCart() {
-        const token = localStorage.getItem('token');
-
-        if (!token) {
-            alert('Brak tokena. Proszę zalogować się ponownie.');
-            window.location.href = 'login.html';
-            return;
-        }
-
-        try {
-            await fetch('https://sklep2.onrender.com/api/cart', {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            displayCart();
-            updateCartCount([]);
-        } catch (error) {
-            console.error('Błąd podczas czyszczenia koszyka:', error);
-            alert('Wystąpił błąd podczas czyszczenia koszyka.');
-        }
-    }
-
     function showNotification(message) {
         const notification = document.getElementById('notification');
         const notificationText = document.getElementById('notification-text');
@@ -231,7 +239,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             const products = await response.json();
-            console.log('Pobrane produkty:', products);  // Logowanie pobranych produktów
+            console.log('Pobrane produkty:', products);
             displayProducts(products);
         } catch (error) {
             console.error('Błąd podczas pobierania produktów:', error);
