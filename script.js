@@ -5,6 +5,16 @@ document.addEventListener('DOMContentLoaded', function() {
     window.updateCartCount = updateCartCount;
     window.clearCart = clearCart;
 
+    // Sprawdź, czy element product-grid istnieje
+    function checkProductGridExistence() {
+        const productGrid = document.querySelector('.product-grid');
+        if (!productGrid) {
+            console.error('Nie można znaleźć elementu .product-grid w DOM');
+            return false;
+        }
+        return true;
+    }
+
     async function getCart() {
         const token = localStorage.getItem('token');
 
@@ -89,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (response.ok) {
                 const updatedCart = await response.json();
-                updateCartCount(updatedCart);
+                updateCartCount(updatedCart.cart);
                 displayCart();
                 showNotification('Produkt usunięty z koszyka');
             } else {
@@ -112,7 +122,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         try {
-            const response = await fetch('https://sklep2.onrender.com/api/cart/clear', {  // Używamy ścieżki 'clear'
+            const response = await fetch('https://sklep2.onrender.com/api/cart/clear', {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -192,46 +202,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    function showNotification(message) {
-        const notification = document.getElementById('notification');
-        const notificationText = document.getElementById('notification-text');
-
-        if (notification && notificationText) {
-            notificationText.textContent = message;
-            notification.style.display = 'flex';
-            notification.style.opacity = '1';
-
-            setTimeout(() => {
-                notification.style.opacity = '0';
-                setTimeout(() => {
-                    notification.style.display = 'none';
-                }, 500);
-            }, 3000);
-        }
-    }
-
-    function checkCartVisibility() {
-        const cartCountElement = document.getElementById('cart-count');
-        const floatingCart = document.getElementById('floating-cart');
-
-        if (!cartCountElement || !floatingCart) {
-            return;
-        }
-
-        const rect = cartCountElement.getBoundingClientRect();
-
-        if (rect.bottom < 0 || rect.top > window.innerHeight) {
-            floatingCart.style.display = 'block';
-        } else {
-            floatingCart.style.display = 'none';
-        }
-    }
-
-    window.addEventListener('scroll', function() {
-        checkCartVisibility();
-    });
-
     async function fetchProducts() {
+        if (!checkProductGridExistence()) return;
+
         try {
             const response = await fetch('https://sklep2.onrender.com/api/products');
             if (!response.ok) {
@@ -239,7 +212,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             const products = await response.json();
-            console.log('Pobrane produkty:', products);
             displayProducts(products);
         } catch (error) {
             console.error('Błąd podczas pobierania produktów:', error);
@@ -254,8 +226,6 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Nie można znaleźć elementu .product-grid w DOM');
             return;
         }
-
-        console.log('Element .product-grid istnieje w DOM');
 
         productGrid.innerHTML = '';  // Wyczyść istniejącą zawartość
 
